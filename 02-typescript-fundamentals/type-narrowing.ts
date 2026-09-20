@@ -127,7 +127,7 @@ speak(myPuppy);
   Number with 2 decimals: $24.50
   Driving on the highway...
   Calculated Area: 50
-  Woof! Woof!
+  Woof! Wooff!
 */
 
 // =============================================================================
