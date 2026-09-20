@@ -1,102 +1,130 @@
-// =============================================================================
-// FILE: 01-javascript-fundamentals/error-handling.js
-// TOPIC: Error Handling (try, catch, finally, throw, and Error Objects)
-// =============================================================================
+/*
+  ==============================================================================
+  W3SCHOOLS-STYLE LEARNING GUIDE: Error Handling (try, catch, finally, throw)
+  ==============================================================================
 
-// -----------------------------------------------------------------------------
-// 1. BASIC TRY...CATCH BLOCK
-// -----------------------------------------------------------------------------
-// Code that might fail is placed in the 'try' block.
-// If an error occurs, execution halts in 'try' and jumps immediately to 'catch'.
+  1. WHAT IS ERROR HANDLING?
+     A structured defense mechanism to catch and manage runtime failures without
+     crashing your entire server or application.
+
+  2. REAL-LIFE ANALOGY:
+     A car's braking and airbag system.
+     - `try`: Driving along the highway.
+     - `throw`: Spotting an unavoidable collision and triggering safety mechanisms.
+     - `catch`: The airbag deploying to absorb the impact so passengers survive.
+     - `finally`: The emergency flashers turning on afterwards, no matter what happened.
+
+  3. JARGON BUSTER:
+     - try block: Code that could potentially throw an exception.
+     - catch block: Code that handles and logs the error if one occurs.
+     - finally block: Code that is GUARANTEED to run regardless of success or failure.
+     - throw: Intentionally creating and signaling an error condition.
+     - Custom Error: Extending the native `Error` class to attach HTTP status codes.
+*/
+
+// =============================================================================
+// STEP 1: BASIC TRY...CATCH
+// =============================================================================
 
 console.log("--- 1. Basic try...catch ---");
 try {
-  // Simulating an error by referencing an undefined variable:
+  // Simulating an intentional ReferenceError:
   const result = nonExistentVariable + 10;
-  console.log("This line will never be reached:", result);
+  console.log("This will never run:", result);
 } catch (error) {
-  console.log("Caught an error successfully!");
-  console.log("Error name:", error.name);       // "ReferenceError"
-  console.log("Error message:", error.message); // "nonExistentVariable is not defined"
+  console.log("Caught Error Successfully!");
+  console.log("Error Name:", error.name);       // "ReferenceError"
+  console.log("Error Message:", error.message); // "nonExistentVariable is not defined"
 }
 
-// -----------------------------------------------------------------------------
-// 2. THE THROW STATEMENT AND BUILT-IN ERROR OBJECT
-// -----------------------------------------------------------------------------
-// Use 'throw' to create your own error conditions when inputs are invalid.
+// =============================================================================
+// STEP 2: THROWING CUSTOM VALIDATION ERRORS
+// =============================================================================
 
-console.log("\n--- 2. Throwing Custom Errors ---");
-
-function divideNumbers(numerator, denominator) {
-  if (denominator === 0) {
-    // Throwing an instance of the standard Error object:
-    throw new Error("Division by zero is not allowed");
+function divideBudget(totalBudget, numberOfTeams) {
+  if (numberOfTeams === 0) {
+    throw new Error("Division by zero: Cannot divide budget by 0 teams.");
   }
-  return numerator / denominator;
+  if (totalBudget < 0) {
+    throw new Error("Invalid budget: Cannot have negative budget.");
+  }
+  return totalBudget / numberOfTeams;
 }
 
 try {
-  const answer = divideNumbers(10, 0);
-  console.log("Answer:", answer);
+  console.log("Valid budget division:", divideBudget(1000, 4)); // $250
+  divideBudget(500, 0); // Throws!
 } catch (error) {
-  console.log("Caught thrown error:", error.message); // "Division by zero is not allowed"
+  console.error("Budget Error Caught:", error.message);
 }
 
-// -----------------------------------------------------------------------------
-// 3. THE FINALLY BLOCK (ALWAYS EXECUTES)
-// -----------------------------------------------------------------------------
-// The 'finally' block runs regardless of whether an error was thrown or not.
-// Essential for resource cleanup (closing database connections, closing files).
+// =============================================================================
+// STEP 3: TRY...CATCH...FINALLY (GUARANTEED CLEANUP)
+// =============================================================================
+// 'finally' is essential for closing database connections, file handles, or network locks!
 
-console.log("\n--- 3. try...catch...finally ---");
-let isFileOpen = false;
+console.log("\n--- 2. try...catch...finally ---");
+let isDatabaseConnectionOpen = false;
 
 try {
-  isFileOpen = true;
-  console.log("File opened successfully.");
+  isDatabaseConnectionOpen = true;
+  console.log("Database connection opened.");
 
-  // Simulating an unexpected failure:
-  throw new Error("Failed while reading file data");
-} catch (error) {
-  console.log("Handled file error:", error.message);
+  // Simulating a failed query:
+  throw new Error("SQL Query Timeout: Record not found.");
+} catch (err) {
+  console.warn("Handled query failure:", err.message);
 } finally {
-  // This ALWAYS runs, ensuring the file is not left open:
-  isFileOpen = false;
-  console.log("Finally executed: File is closed (isFileOpen =", isFileOpen, ")");
+  // This block ALWAYS executes!
+  isDatabaseConnectionOpen = false;
+  console.log("Cleanup: Database connection closed safely (status:", isDatabaseConnectionOpen, ")");
 }
 
-// -----------------------------------------------------------------------------
-// 4. CUSTOM ERROR TYPES (EXTENDING THE ERROR CLASS)
-// -----------------------------------------------------------------------------
-// Useful in backend applications to distinguish between different kinds of failures.
-
-console.log("\n--- 4. Custom Error Hierarchy ---");
+// =============================================================================
+// STEP 4: CUSTOM DOMAIN ERROR CLASS (BACKEND STANDARD)
+// =============================================================================
+// Attaching HTTP status codes to distinguish client errors from internal server crashes:
 
 class ValidationError extends Error {
-  constructor(message, field) {
+  constructor(message, fieldName) {
     super(message);
     this.name = "ValidationError";
-    this.field = field;
+    this.fieldName = fieldName;
+    this.statusCode = 400; // Bad Request
   }
 }
 
-function validateEmail(email) {
-  if (!email) {
-    throw new ValidationError("Email cannot be empty", "email");
+function registerUserAccount(email) {
+  if (!email || !email.includes("@")) {
+    throw new ValidationError("Invalid email address format.", "email");
   }
-  if (!email.includes("@")) {
-    throw new ValidationError("Email must contain '@'", "email");
-  }
-  return "Email is valid";
+  return { success: true, email: email };
 }
 
 try {
-  validateEmail("invalid-email-string");
-} catch (error) {
-  // Using instanceof to identify the specific error type:
-  if (error instanceof ValidationError) {
-    console.log(`Validation Error on field '${error.field}': ${error.message}`);
+  registerUserAccount("invalid-email-string");
+} catch (err) {
+  if (err instanceof ValidationError) {
+    console.error(`[HTTP ${err.statusCode}] Field '${err.fieldName}': ${err.message}`);
   } else {
-    console.log("Unexpected general error:", error.message);
+    console.error("[HTTP 500] Unexpected Internal Server Error:", err);
   }
 }
+
+/*
+  ------------------------------------------------------------------------------
+  [EXPECTED OUTPUT IN TERMINAL]
+  ------------------------------------------------------------------------------
+  --- 1. Basic try...catch ---
+  Caught Error Successfully!
+  Error Name: ReferenceError
+  Error Message: nonExistentVariable is not defined
+  Valid budget division: 250
+  Budget Error Caught: Division by zero: Cannot divide budget by 0 teams.
+
+  --- 2. try...catch...finally ---
+  Database connection opened.
+  Handled query failure: SQL Query Timeout: Record not found.
+  Cleanup: Database connection closed safely (status: false )
+  [HTTP 400] Field 'email': Invalid email address format.
+*/

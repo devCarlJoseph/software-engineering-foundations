@@ -1,96 +1,115 @@
+/*
+  ==============================================================================
+  W3SCHOOLS-STYLE LEARNING GUIDE: Destructuring Assignment
+  ==============================================================================
+
+  1. WHAT IS DESTRUCTURING?
+     A clean syntax that unpacks values from arrays or properties from objects
+     into distinct, individual variables in a single line.
+
+  2. REAL-LIFE ANALOGY:
+     Unpacking a Grocery Bag.
+     Instead of pulling the entire heavy bag out every time you want an apple,
+     you unpack the apple and milk directly into individual refrigerator spots.
+
+  3. JARGON BUSTER:
+     - Destructuring: Extracting data from arrays/objects using pattern matching.
+     - Property Aliasing / Renaming: Extracting a property while giving the variable
+       a different name (`{ oldName: newName }`).
+     - Default Fallback: Assigning a backup value if the property is undefined.
+     - Positional Matching: In array destructuring, variables match by index order (0, 1, 2).
+*/
+
 // =============================================================================
-// FILE: 01-javascript-fundamentals/destructuring.js
-// TOPIC: Destructuring Assignment (Objects and Arrays)
+// STEP 1: OBJECT DESTRUCTURING (EXTRACTION, RENAMING, & DEFAULTS)
 // =============================================================================
 
-// -----------------------------------------------------------------------------
-// 1. BASIC OBJECT DESTRUCTURING
-// -----------------------------------------------------------------------------
-// Unpacks properties from an object into distinct variables matching the property names.
-
-const databaseConfig = {
-  host: "localhost",
+const serverConfig = {
+  hostName: "api.production.internal",
   port: 5432,
-  database: "foundations_db",
+  // databaseName is intentionally omitted to test default fallback!
 };
 
-const { host, port, database } = databaseConfig;
-console.log("Host:", host);         // "localhost"
-console.log("Port:", port);         // 5432
-console.log("Database:", database); // "foundations_db"
+// Extracting properties:
+// - hostName is renamed to 'domain'
+// - port is extracted as 'port'
+// - databaseName gets default fallback "main_db"
+const { hostName: domain, port, databaseName = "main_db" } = serverConfig;
 
-// -----------------------------------------------------------------------------
-// 2. RENAMING VARIABLES & DEFAULT VALUES (OBJECTS)
-// -----------------------------------------------------------------------------
-const serverResponse = {
-  status: 200,
-  url: "https://api.test.com/data",
-  // timeout is missing from serverResponse
-};
+console.log("Extracted Domain:", domain);
+console.log("Extracted Port:", port);
+console.log("Default Database:", databaseName);
 
-// Syntax: { propertyName: newVariableName = defaultValue }
-const {
-  status: statusCode, // Renamed 'status' to 'statusCode'
-  url: endpointUrl,   // Renamed 'url' to 'endpointUrl'
-  timeout = 5000,     // Default value assigned because timeout does not exist in object
-} = serverResponse;
+// =============================================================================
+// STEP 2: NESTED OBJECT DESTRUCTURING
+// =============================================================================
 
-console.log("Renamed status:", statusCode);   // 200
-console.log("Renamed url:", endpointUrl);     // "https://api.test.com/data"
-console.log("Default timeout:", timeout);     // 5000
-
-// -----------------------------------------------------------------------------
-// 3. NESTED OBJECT DESTRUCTURING
-// -----------------------------------------------------------------------------
-const developerProfile = {
-  id: 101,
-  personal: {
+const userAccount = {
+  id: "usr_998",
+  profile: {
     fullName: "Carl Joseph",
-    city: "Manila",
+    location: {
+      city: "Manila",
+      country: "Philippines",
+    },
   },
 };
 
+// Reaching deep into nested structures in one single statement:
 const {
-  personal: { fullName, city },
-} = developerProfile;
+  profile: {
+    fullName,
+    location: { city },
+  },
+} = userAccount;
 
-console.log("Nested Name:", fullName); // "Carl Joseph"
-console.log("Nested City:", city);     // "Manila"
+console.log("User:", fullName, "lives in:", city);
 
-// -----------------------------------------------------------------------------
-// 4. BASIC ARRAY DESTRUCTURING (POSITIONAL)
-// -----------------------------------------------------------------------------
-// Unpacks values from an array according to their index position.
+// =============================================================================
+// STEP 3: ARRAY DESTRUCTURING (POSITIONAL MATCHING)
+// =============================================================================
 
-const coordinates = [14.5995, 120.9842];
+const coordinates = [14.5995, 120.9842]; // [Latitude, Longitude]
 
+// Position 0 -> lat, Position 1 -> lng
 const [latitude, longitude] = coordinates;
-console.log("Latitude:", latitude);   // 14.5995
-console.log("Longitude:", longitude); // 120.9842
+console.log("Latitude:", latitude, "Longitude:", longitude);
 
-// -----------------------------------------------------------------------------
-// 5. SKIPPING ARRAY ELEMENTS & DEFAULTS
-// -----------------------------------------------------------------------------
-const colors = ["Red", "Green", "Blue", "Yellow"];
+// Skipping elements with commas:
+const rgbColors = ["#FF0000", "#00FF00", "#0000FF"];
+const [redHex, , blueHex] = rgbColors; // Skipped index 1 ("#00FF00")
+console.log("Red:", redHex, "Blue:", blueHex);
 
-// Skip elements using commas:
-const [firstColor, , thirdColor] = colors; // Skipped index 1 ("Green")
-console.log("First color:", firstColor); // "Red"
-console.log("Third color:", thirdColor); // "Blue"
+// =============================================================================
+// STEP 4: FUNCTION PARAMETER DESTRUCTURING (EXPRESS CONTROLLER PATTERN)
+// =============================================================================
+// Standard pattern for Node.js API handlers receiving `req.body`:
 
-// Default value for array items that are undefined:
-const [primaryRole, secondaryRole = "guest"] = ["admin"];
-console.log("Primary role:", primaryRole);     // "admin"
-console.log("Secondary role:", secondaryRole); // "guest" (used fallback)
+function handleTaskCreation({ title, priority = "medium", isDone = false }) {
+  console.log(`Creating Task: "${title}" [Priority: ${priority}] (Completed: ${isDone})`);
+}
 
-// -----------------------------------------------------------------------------
-// 6. SWAPPING VARIABLES WITH ARRAY DESTRUCTURING
-// -----------------------------------------------------------------------------
-let valA = "FIRST";
-let valB = "SECOND";
+handleTaskCreation({ title: "Build PostgreSQL Schema", priority: "high" });
 
-// Swap without temporary variable:
-[valA, valB] = [valB, valA];
+// =============================================================================
+// STEP 5: SWAPPING VARIABLES WITHOUT TEMPORARY VARIABLES
+// =============================================================================
+let player1 = "Mario";
+let player2 = "Luigi";
 
-console.log("After swap - valA:", valA); // "SECOND"
-console.log("After swap - valB:", valB); // "FIRST"
+[player1, player2] = [player2, player1]; // Swapped!
+console.log("After Swap: Player 1 =", player1, "| Player 2 =", player2);
+
+/*
+  ------------------------------------------------------------------------------
+  [EXPECTED OUTPUT IN TERMINAL]
+  ------------------------------------------------------------------------------
+  Extracted Domain: api.production.internal
+  Extracted Port: 5432
+  Default Database: main_db
+  User: Carl Joseph lives in: Manila
+  Latitude: 14.5995 Longitude: 120.9842
+  Red: #FF0000 Blue: #0000FF
+  Creating Task: "Build PostgreSQL Schema" [Priority: high] (Completed: false)
+  After Swap: Player 1 = Luigi | Player 2 = Mario
+*/

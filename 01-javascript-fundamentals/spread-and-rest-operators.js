@@ -1,105 +1,109 @@
+/*
+  ==============================================================================
+  W3SCHOOLS-STYLE LEARNING GUIDE: Spread (...) and Rest (...) Operators
+  ==============================================================================
+
+  1. WHAT ARE SPREAD AND REST?
+     Both use the exact same three dots `...`, but perform OPPOSITE jobs:
+     - SPREAD: Unpacks/expands elements of an array or object into individual items.
+     - REST: Gathers multiple individual items together into a single array or object.
+
+  2. REAL-LIFE ANALOGY:
+     - SPREAD: Dumping a bag of marbles out onto the floor so they scatter.
+     - REST: Scooping up all loose marbles on the floor and placing them into a jar.
+
+  3. JARGON BUSTER:
+     - Spread Syntax: `[...array]` or `{...object}` expanding items into a new container.
+     - Rest Parameter: `function(...args)` collecting leftover function arguments.
+     - Shallow Copy: Copying only top-level values. Nested objects/arrays still share
+       memory references!
+     - Variadic Function: A function that accepts any variable number of arguments.
+*/
+
 // =============================================================================
-// FILE: 01-javascript-fundamentals/spread-and-rest-operators.js
-// TOPIC: Spread Operator (...spread) and Rest Parameters (...rest)
+// STEP 1: SPREAD OPERATOR WITH ARRAYS (EXPANDING)
 // =============================================================================
 
-// -----------------------------------------------------------------------------
-// 1. SPREAD WITH ARRAYS (EXPANDING ELEMENTS)
-// -----------------------------------------------------------------------------
-// The spread operator (...) expands an array into individual elements.
-
-const frontendTech = ["HTML", "CSS", "JavaScript"];
+const frontendTech = ["React", "Vue"];
 const backendTech = ["Node.js", "Express", "PostgreSQL"];
 
-// Merging arrays into a new combined array:
-const fullStackTech = [...frontendTech, ...backendTech, "Docker"];
-console.log("Merged array:", fullStackTech);
+// Combining arrays without .concat():
+const fullStackStack = ["Git", ...frontendTech, ...backendTech, "Docker"];
+console.log("Combined Stack:", fullStackStack);
 
-// Creating a shallow clone of an array:
-const originalNumbers = [1, 2, 3];
-const clonedNumbers = [...originalNumbers];
-clonedNumbers.push(4); // Modifying the clone does not affect the original
-console.log("Original numbers:", originalNumbers); // [1, 2, 3]
-console.log("Cloned numbers:", clonedNumbers);     // [1, 2, 3, 4]
+// Passing array elements as arguments to Math functions:
+const testScores = [88, 92, 79, 99, 85];
+const highestScore = Math.max(...testScores); // Math.max(88, 92, 79, 99, 85)
+console.log("Highest Score:", highestScore); // 99
 
-// Spreading an array into Math functions:
-const testScores = [88, 92, 79, 95, 84];
-const highestScore = Math.max(...testScores); // Math.max(88, 92, 79, 95, 84)
-console.log("Highest score:", highestScore); // 95
-
-// -----------------------------------------------------------------------------
-// 2. SPREAD WITH OBJECTS (EXPANDING PROPERTIES)
-// -----------------------------------------------------------------------------
-// The spread operator on an object copies its key-value pairs into a new object.
+// =============================================================================
+// STEP 2: SPREAD OPERATOR WITH OBJECTS (MERGING & OVERRIDING)
+// =============================================================================
+// Properties defined later overwrite properties from earlier objects!
 
 const defaultSettings = {
   theme: "dark",
   fontSize: 14,
-  autoSave: true,
+  showNotifications: true,
 };
 
 const userPreferences = {
-  fontSize: 16, // User chooses a different font size
+  fontSize: 18, // User customized their font size
 };
 
-// Merging objects (keys from later objects override keys from earlier objects):
-const finalSettings = {
+const finalConfig = {
   ...defaultSettings,
   ...userPreferences,
-  lastUpdated: "2026-09-19",
+  lastUpdated: "2026-09-20",
 };
-console.log("Final merged settings:", finalSettings);
-// { theme: "dark", fontSize: 16, autoSave: true, lastUpdated: "2026-09-19" }
 
-// -----------------------------------------------------------------------------
-// 3. REST PARAMETER IN FUNCTION ARGUMENTS (GATHERING VALUES)
-// -----------------------------------------------------------------------------
-// The rest operator gathers multiple remaining arguments into a single Array.
-// Rule: The rest parameter MUST be the last parameter in the function signature.
+console.log("Merged Configuration:", finalConfig);
 
-function sumAllNumbers(...numbersToSum) {
-  // numbersToSum is a true array!
-  let total = 0;
-  for (const num of numbersToSum) {
-    total += num;
-  }
-  return total;
+// =============================================================================
+// STEP 3: REST PARAMETERS IN FUNCTIONS (GATHERING ARGUMENTS)
+// =============================================================================
+// Rule: The rest parameter MUST be the last parameter in the function signature!
+
+function sumScores(studentName, ...scores) {
+  // 'scores' is collected into a TRUE array!
+  const total = scores.reduce((sum, val) => sum + val, 0);
+  return `${studentName}'s total score: ${total} across ${scores.length} exams`;
 }
 
-console.log("Sum 3 items:", sumAllNumbers(10, 20, 30));             // 60
-console.log("Sum 5 items:", sumAllNumbers(1, 2, 3, 4, 5));          // 15
+console.log(sumScores("Carl", 95, 88, 92));        // 3 exams
+console.log(sumScores("Alice", 100, 98, 95, 94));  // 4 exams
 
-// Combining standard parameters with rest parameters:
-function logTeam(teamName, leader, ...members) {
-  console.log(`Team: ${teamName}`);
-  console.log(`Leader: ${leader}`);
-  console.log(`Members: ${members.join(", ")}`);
-}
+// =============================================================================
+// STEP 4: REST IN DESTRUCTURING (SENSITIVE DATA SANITIZATION)
+// =============================================================================
+// Backend Pattern: Strip out passwords before sending user data over an API!
 
-logTeam("Alpha", "Carl", "Alice", "Bob", "Charlie");
-
-// -----------------------------------------------------------------------------
-// 4. REST IN DESTRUCTURING
-// -----------------------------------------------------------------------------
-// Collects the remaining properties or elements that were not explicitly unpacked.
-
-// Rest in Array Destructuring:
-const colors = ["Red", "Green", "Blue", "Yellow", "Purple"];
-const [firstColor, secondColor, ...remainingColors] = colors;
-
-console.log("First color:", firstColor);           // "Red"
-console.log("Second color:", secondColor);         // "Green"
-console.log("Remaining colors:", remainingColors); // ["Blue", "Yellow", "Purple"]
-
-// Rest in Object Destructuring:
-const userAccount = {
-  id: 1,
-  username: "carl",
-  passwordHash: "secret123",
+const databaseUserRecord = {
+  id: 101,
+  username: "carl_dev",
+  passwordHash: "$2b$12$secretPasswordHash",
+  role: "admin",
   email: "carl@example.com",
 };
 
-// Isolate sensitive fields and collect the rest:
-const { passwordHash, ...publicProfile } = userAccount;
-console.log("Sensitive field omitted:", publicProfile);
-// { id: 1, username: "carl", email: "carl@example.com" }
+// passwordHash is extracted alone; remaining fields gathered into 'publicProfile':
+const { passwordHash, ...publicProfile } = databaseUserRecord;
+
+console.log("Safe Public Profile (Password Omitted):", publicProfile);
+
+/*
+  ------------------------------------------------------------------------------
+  [EXPECTED OUTPUT IN TERMINAL]
+  ------------------------------------------------------------------------------
+  Combined Stack: [ 'Git', 'React', 'Vue', 'Node.js', 'Express', 'PostgreSQL', 'Docker' ]
+  Highest Score: 99
+  Merged Configuration: {
+    theme: 'dark',
+    fontSize: 18,
+    showNotifications: true,
+    lastUpdated: '2026-09-20'
+  }
+  Carl's total score: 275 across 3 exams
+  Alice's total score: 387 across 4 exams
+  Safe Public Profile (Password Omitted): { id: 101, username: 'carl_dev', role: 'admin', email: 'carl@example.com' }
+*/

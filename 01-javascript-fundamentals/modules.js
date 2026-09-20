@@ -1,58 +1,78 @@
+/*
+  ==============================================================================
+  W3SCHOOLS-STYLE LEARNING GUIDE: Node.js Modules (CommonJS)
+  ==============================================================================
+
+  1. WHAT ARE MODULES?
+     A module is a single JavaScript file. By default, variables defined inside
+     a file are completely private to that file.
+     To share variables, classes, or functions, you must explicitly EXPORT them.
+
+  2. REAL-LIFE ANALOGY:
+     A Restaurant Kitchen.
+     The kitchen has private recipes, secret spices, and knives (private variables).
+     The only things that leave the kitchen to the dining room are the prepared
+     meals placed on the pickup counter (`module.exports`).
+
+  3. JARGON BUSTER:
+     - CommonJS (CJS): The module system historically built into Node.js (`module.exports` and `require`).
+     - ES Modules (ESM): The modern browser/JS standard (`export` and `import`).
+     - Encapsulation: Keeping sensitive data private inside a file while exposing
+       only safe public helper methods.
+*/
+
 // =============================================================================
-// FILE: 01-javascript-fundamentals/modules.js
-// TOPIC: Modules (Defining and Exporting Data and Utilities)
+// STEP 1: PRIVATE INTERNALS (NOT EXPORTED)
 // =============================================================================
+// These variables CANNOT be seen, read, or modified by outside files!
 
-// Modules encapsulate code by keeping internal variables private and
-// explicitly choosing what to expose to other files.
+const SECRET_API_SALT = "x_super_secret_salt_99";
 
-// -----------------------------------------------------------------------------
-// 1. PRIVATE VARIABLES AND HELPERS (NOT EXPORTED)
-// -----------------------------------------------------------------------------
-// These variables cannot be accessed or modified by files that import this module.
-
-const INTERNAL_MODULE_ID = "MOD_101";
-const SECRET_TOKEN = "xyz_secret_token";
-
-// -----------------------------------------------------------------------------
-// 2. VALUES INTENDED FOR EXPORT
-// -----------------------------------------------------------------------------
-
-const APP_TITLE = "Foundations Application";
-const API_VERSION = 1;
-
-function formatGreeting(name) {
-  return `Hello, ${name}! Welcome to ${APP_TITLE}.`;
+function logPrivateDiagnostic(message) {
+  console.log(`[DIAGNOSTIC]: ${message}`);
 }
 
-function calculateDiscount(price, percentage) {
-  return price - price * (percentage / 100);
+// =============================================================================
+// STEP 2: PUBLIC INTERFACES (VALUES INTENDED FOR EXPORT)
+// =============================================================================
+
+const APP_VERSION = "2.1.0";
+const MAX_RETRY_COUNT = 3;
+
+function sanitizeInput(str) {
+  if (typeof str !== "string") return "";
+  return str.trim();
 }
 
-// -----------------------------------------------------------------------------
-// 3. COMMONJS EXPORT SYNTAX (Standard Node.js default)
-// -----------------------------------------------------------------------------
-// Assigning an object to module.exports bundles everything we want to make public.
+function calculateDiscountPrice(originalPrice, discountPercent) {
+  return originalPrice - originalPrice * (discountPercent / 100);
+}
+
+class SimpleLogger {
+  log(message) {
+    console.log(`[APP LOG]: ${message}`);
+  }
+}
+
+// =============================================================================
+// STEP 3: EXPORTING VIA MODULE.EXPORTS (COMMONJS)
+// =============================================================================
+// Assigning an object to module.exports bundles everything we want to make public:
 
 module.exports = {
-  APP_TITLE,
-  API_VERSION,
-  formatGreeting,
-  calculateDiscount,
+  APP_VERSION,
+  MAX_RETRY_COUNT,
+  sanitizeInput,
+  calculateDiscountPrice,
+  SimpleLogger,
 };
 
-// -----------------------------------------------------------------------------
-// 4. ES MODULE (ESM) SYNTAX REFERENCE (Equivalent modern syntax)
-// -----------------------------------------------------------------------------
+// =============================================================================
+// REFERENCE: ES MODULES (ESM) EQUIVALENT
+// =============================================================================
 /*
-// If your package.json contains "type": "module" or when using TypeScript:
+  If your project uses "type": "module" in package.json, the syntax looks like:
 
-// Named exports:
-export { APP_TITLE, API_VERSION, formatGreeting, calculateDiscount };
-
-// Direct inline export:
-export const PI = 3.14159;
-
-// Default export:
-export default formatGreeting;
+  export { APP_VERSION, sanitizeInput, calculateDiscountPrice, SimpleLogger };
+  export default SimpleLogger;
 */

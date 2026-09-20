@@ -1,103 +1,125 @@
+/*
+  ==============================================================================
+  W3SCHOOLS-STYLE LEARNING GUIDE: Loops & Iteration
+  ==============================================================================
+
+  1. WHAT ARE LOOPS?
+     Loops execute a block of code repeatedly as long as a condition remains true.
+     They eliminate repetitive code when processing arrays, database records,
+     or counting steps.
+
+  2. REAL-LIFE ANALOGY:
+     A factory quality-control line:
+     For every product on the conveyor belt, inspect it. If defective, skip it (`continue`).
+     If the emergency alarm sounds, shut down the entire line immediately (`break`).
+
+  3. JARGON BUSTER:
+     - Iteration: A single cycle or pass through a loop.
+     - for...of: Iterates over the VALUES of an iterable (Arrays, Strings, Maps).
+     - for...in: Iterates over the KEYS / property names of an Object.
+     - break: Instantly aborts and exits the loop entirely.
+     - continue: Skips the rest of the current iteration and jumps to the next one.
+*/
+
 // =============================================================================
-// FILE: 01-javascript-fundamentals/loops.js
-// TOPIC: Loops and Iteration (for, while, do...while, for...of, for...in, break, continue)
+// STEP 1: CLASSIC FOR LOOP (INDEXED CONTROL)
 // =============================================================================
+// Use when you need the exact index position, step sizes, or reverse counting.
 
-// -----------------------------------------------------------------------------
-// 1. CLASSIC FOR LOOP (INDEXED ITERATION)
-// -----------------------------------------------------------------------------
-// Syntax: for (initialization; condition; increment/decrement)
-
-console.log("--- 1. Forward For Loop ---");
-for (let i = 1; i <= 5; i++) {
-  console.log("Iteration count:", i);
-}
-
-console.log("--- 2. Reverse For Loop ---");
-for (let i = 5; i >= 1; i--) {
+console.log("--- 1. Reverse For Loop ---");
+for (let i = 3; i >= 1; i--) {
   console.log("Countdown:", i);
 }
 
-// -----------------------------------------------------------------------------
-// 2. WHILE LOOP
-// -----------------------------------------------------------------------------
-// Runs as long as the condition evaluates to true. Checked BEFORE each iteration.
+// =============================================================================
+// STEP 2: FOR...OF LOOP (THE MODERN WAY TO LOOP OVER ARRAYS)
+// =============================================================================
+// Clean, readable, and directly gives you the item value.
 
-console.log("--- 3. While Loop ---");
-let batteryLevel = 20;
+console.log("\n--- 2. For...Of Loop (Array Values) ---");
+const cloudDatabases = ["PostgreSQL", "MongoDB", "Redis"];
 
-while (batteryLevel < 35) {
-  console.log(`Charging... Battery level: ${batteryLevel}%`);
-  batteryLevel += 5;
+for (const dbName of cloudDatabases) {
+  console.log("Connecting to:", dbName);
 }
-console.log("Charged to target level:", batteryLevel);
 
-// -----------------------------------------------------------------------------
-// 3. DO...WHILE LOOP
-// -----------------------------------------------------------------------------
-// Runs the code block AT LEAST ONCE before checking the condition.
+// =============================================================================
+// STEP 3: FOR...IN LOOP (LOOPING OVER OBJECT KEYS)
+// =============================================================================
 
-console.log("--- 4. Do...While Loop ---");
-let attempts = 5;
+console.log("\n--- 3. For...In Loop (Object Properties) ---");
+const serverStatus = { host: "127.0.0.1", port: 5432, isOnline: true };
 
+for (const key in serverStatus) {
+  console.log(`${key} => ${serverStatus[key]}`);
+}
+
+// =============================================================================
+// STEP 4: WHILE & DO...WHILE LOOPS
+// =============================================================================
+
+console.log("\n--- 4. While Loop (Connection Retries) ---");
+let retryAttempts = 0;
+const MAX_RETRIES = 3;
+
+while (retryAttempts < MAX_RETRIES) {
+  retryAttempts++;
+  console.log(`Connection attempt #${retryAttempts}`);
+}
+
+console.log("\n--- 5. Do...While Loop (Guaranteed At Least Once) ---");
+let count = 0;
 do {
-  console.log("This executes at least once! Current attempt:", attempts);
-  attempts++;
-} while (attempts < 3); // Condition is false, so loop terminates immediately
+  console.log("Runs at least once even if condition is false! Count:", count);
+  count++;
+} while (count < 0); // Condition is false from the start!
 
-// -----------------------------------------------------------------------------
-// 4. FOR...OF LOOP (ITERATING OVER VALUES OF ARRAYS & STRINGS)
-// -----------------------------------------------------------------------------
-// The cleanest way to iterate over values in an iterable collection.
+// =============================================================================
+// STEP 5: BREAK AND CONTINUE
+// =============================================================================
 
-console.log("--- 5. For...Of Loop over Array ---");
-const languages = ["JavaScript", "TypeScript", "SQL"];
+console.log("\n--- 6. Continue & Break in Action ---");
+const numbers = [1, 2, 3, 4, 5, 6];
 
-for (const language of languages) {
-  console.log("Language item:", language);
-}
-
-console.log("--- 6. For...Of Loop over String ---");
-const word = "CODE";
-for (const character of word) {
-  console.log("Character:", character);
-}
-
-// -----------------------------------------------------------------------------
-// 5. FOR...IN LOOP (ENUMERATING PROPERTY KEYS OF AN OBJECT)
-// -----------------------------------------------------------------------------
-// Iterates over keys/property names of an object.
-
-console.log("--- 7. For...In Loop over Object ---");
-const serverStatus = {
-  host: "localhost",
-  port: 3000,
-  isOnline: true,
-};
-
-for (const propertyKey in serverStatus) {
-  console.log(`Key: ${propertyKey} | Value: ${serverStatus[propertyKey]}`);
-}
-
-// -----------------------------------------------------------------------------
-// 6. LOOP CONTROL: BREAK AND CONTINUE
-// -----------------------------------------------------------------------------
-
-console.log("--- 8. Continue Statement ---");
-// continue skips the current iteration and jumps to the next one
-for (let num = 1; num <= 6; num++) {
-  if (num % 2 === 0) {
-    continue; // Skip even numbers
+for (const num of numbers) {
+  if (num === 2) {
+    continue; // Skip number 2 and jump to next iteration
   }
-  console.log("Odd number printed:", num); // Prints 1, 3, 5
+  if (num === 5) {
+    break; // Terminate the entire loop when reaching 5
+  }
+  console.log("Processed Number:", num); // Prints 1, 3, 4
 }
 
-console.log("--- 9. Break Statement ---");
-// break terminates the entire loop immediately
-for (let num = 1; num <= 10; num++) {
-  if (num === 4) {
-    console.log("Stopping loop early at:", num);
-    break;
-  }
-  console.log("Processing number:", num); // Prints 1, 2, 3
-}
+/*
+  ------------------------------------------------------------------------------
+  [EXPECTED OUTPUT IN TERMINAL]
+  ------------------------------------------------------------------------------
+  --- 1. Reverse For Loop ---
+  Countdown: 3
+  Countdown: 2
+  Countdown: 1
+
+  --- 2. For...Of Loop (Array Values) ---
+  Connecting to: PostgreSQL
+  Connecting to: MongoDB
+  Connecting to: Redis
+
+  --- 3. For...In Loop (Object Properties) ---
+  host => 127.0.0.1
+  port => 5432
+  isOnline => true
+
+  --- 4. While Loop (Connection Retries) ---
+  Connection attempt #1
+  Connection attempt #2
+  Connection attempt #3
+
+  --- 5. Do...While Loop (Guaranteed At Least Once) ---
+  Runs at least once even if condition is false! Count: 0
+
+  --- 6. Continue & Break in Action ---
+  Processed Number: 1
+  Processed Number: 3
+  Processed Number: 4
+*/

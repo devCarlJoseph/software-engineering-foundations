@@ -1,84 +1,102 @@
+/*
+  ==============================================================================
+  W3SCHOOLS-STYLE LEARNING GUIDE: JavaScript Arrays & Functional Methods
+  ==============================================================================
+
+  1. WHAT IS AN ARRAY?
+     An ordered, zero-indexed list of data elements. In JavaScript, arrays can
+     hold any mix of primitives and objects.
+
+  2. REAL-LIFE ANALOGY:
+     A shopping receipt or Spotify playlist:
+     - `map`: Converting every song title to UPPERCASE.
+     - `filter`: Selecting only songs marked as "Favorites".
+     - `reduce`: Adding up the total duration of every song on the playlist.
+
+  3. JARGON BUSTER:
+     - Mutating Method: Modifies the original array directly (`push`, `pop`, `splice`).
+     - Non-Mutating / Pure Method: Leaves the original array untouched and returns
+       a brand-new transformed array (`map`, `filter`, `toSorted`).
+     - Predicate Function: A callback function that returns `true` or `false` to
+       make a decision (used in `filter`, `find`, `some`, `every`).
+     - Accumulator: The running total value being built up inside `.reduce()`.
+*/
+
+// Mock Data: E-Commerce Product Catalog
+const catalog = [
+  { id: "p1", name: "Mechanical Keyboard", price: 90, inStock: true },
+  { id: "p2", name: "Wireless Mouse", price: 30, inStock: true },
+  { id: "p3", name: "Gaming Monitor", price: 300, inStock: false },
+  { id: "p4", name: "USB-C Cable", price: 15, inStock: true },
+];
+
 // =============================================================================
-// FILE: 01-javascript-fundamentals/arrays.js
-// TOPIC: Arrays (Creation, Indexing, Mutating Methods, and Iterator Methods)
+// STEP 1: MAP (TRANSFORM EVERY ITEM -> RETURNS NEW ARRAY)
 // =============================================================================
+// Extract just the product names formatted cleanly:
 
-// -----------------------------------------------------------------------------
-// 1. ARRAY BASICS AND ZERO-INDEXING
-// -----------------------------------------------------------------------------
-const fruits = ["Apple", "Banana", "Cherry", "Mango"];
+const productNames = catalog.map((product) => product.name);
+console.log("All Product Names:", productNames);
 
-console.log("First element (index 0):", fruits[0]); // "Apple"
-console.log("Third element (index 2):", fruits[2]); // "Cherry"
-console.log("Array length:", fruits.length);         // 4
-console.log("Last element:", fruits[fruits.length - 1]); // "Mango"
-console.log("Modern last element with .at(-1):", fruits.at(-1)); // "Mango"
+// =============================================================================
+// STEP 2: FILTER (SELECT MATCHING ITEMS -> RETURNS NEW ARRAY)
+// =============================================================================
+// Select only items that are in stock AND cost less than $100:
 
-// -----------------------------------------------------------------------------
-// 2. BASIC MUTATING METHODS (MODIFY THE ORIGINAL ARRAY)
-// -----------------------------------------------------------------------------
-const tasks = ["Task 1", "Task 2"];
+const affordableAvailableItems = catalog.filter((product) => {
+  return product.inStock && product.price < 100;
+});
+console.log("Affordable & In Stock:", affordableAvailableItems.map((p) => p.name));
 
-tasks.push("Task 3"); // Adds to the END of array
-console.log("After push:", tasks); // ["Task 1", "Task 2", "Task 3"]
-
-const poppedItem = tasks.pop(); // Removes from the END of array and returns it
-console.log("Popped item:", poppedItem); // "Task 3"
-
-tasks.unshift("Task 0"); // Adds to the BEGINNING of array
-console.log("After unshift:", tasks); // ["Task 0", "Task 1", "Task 2"]
-
-const shiftedItem = tasks.shift(); // Removes from the BEGINNING of array and returns it
-console.log("Shifted item:", shiftedItem); // "Task 0"
-
-// -----------------------------------------------------------------------------
-// 3. MAP (TRANSFORMS EACH ELEMENT -> RETURNS A NEW ARRAY)
-// -----------------------------------------------------------------------------
-const numbers = [1, 2, 3, 4, 5];
-
-const doubledNumbers = numbers.map((num) => num * 2);
-console.log("Original numbers:", numbers);         // [1, 2, 3, 4, 5] (untouched!)
-console.log("Doubled with .map():", doubledNumbers); // [2, 4, 6, 8, 10]
-
-// -----------------------------------------------------------------------------
-// 4. FILTER (SELECTS MATCHING ELEMENTS -> RETURNS A NEW ARRAY)
-// -----------------------------------------------------------------------------
-const scores = [45, 82, 90, 63, 77, 95];
-
-const passingScores = scores.filter((score) => score >= 75);
-console.log("Passing scores with .filter():", passingScores); // [82, 90, 77, 95]
-
-// -----------------------------------------------------------------------------
-// 5. REDUCE (ACCUMULATES ALL ELEMENTS INTO ONE FINAL VALUE)
-// -----------------------------------------------------------------------------
+// =============================================================================
+// STEP 3: REDUCE (ACCUMULATE ALL ITEMS INTO A SINGLE RESULT)
+// =============================================================================
 // Syntax: array.reduce((accumulator, currentItem) => ..., initialValue)
 
-const expenses = [50, 120, 30, 200];
-
-const totalExpense = expenses.reduce((accumulator, current) => {
-  return accumulator + current;
+const totalInventoryValue = catalog.reduce((runningTotal, product) => {
+  return product.inStock ? runningTotal + product.price : runningTotal;
 }, 0); // 0 is the starting accumulator
 
-console.log("Total sum with .reduce():", totalExpense); // 400
+console.log("Total In-Stock Inventory: $" + totalInventoryValue);
 
-// -----------------------------------------------------------------------------
-// 6. SEARCHING IN ARRAYS (FIND, INCLUDES, SOME, EVERY)
-// -----------------------------------------------------------------------------
-const userRoles = ["viewer", "editor", "moderator"];
+// =============================================================================
+// STEP 4: SEARCH METHODS (FIND, SOME, EVERY, INCLUDES)
+// =============================================================================
 
-// includes: returns true/false
-console.log("Includes editor?:", userRoles.includes("editor")); // true
-console.log("Includes admin?:", userRoles.includes("admin"));   // false
+// find: Returns the FIRST matching item (or undefined)
+const foundMonitor = catalog.find((product) => product.id === "p3");
+console.log("Found Item:", foundMonitor ? foundMonitor.name : "Not found");
 
-// find: returns the first matching item, or undefined
-const numbersList = [10, 25, 40, 55, 70];
-const firstOverFifty = numbersList.find((num) => num > 50);
-console.log("First number > 50 with .find():", firstOverFifty); // 55
+// some: Returns true if AT LEAST ONE item meets the condition
+const hasOutOfStockItems = catalog.some((product) => !product.inStock);
+console.log("Any out-of-stock items?:", hasOutOfStockItems); // true
 
-// some: returns true if AT LEAST ONE item matches condition
-const hasSmallNumber = numbersList.some((num) => num < 15);
-console.log("Has number < 15?:", hasSmallNumber); // true
+// every: Returns true ONLY if ALL items meet the condition
+const allCostOverTen = catalog.every((product) => product.price > 10);
+console.log("All items cost over $10?:", allCostOverTen); // true
 
-// every: returns true only if ALL items match condition
-const allArePositive = numbersList.every((num) => num > 0);
-console.log("All numbers are positive?:", allArePositive); // true
+// =============================================================================
+// STEP 5: MUTATING VS IMMUTABLE SORTING (ES2023)
+// =============================================================================
+const rawNumbers = [40, 10, 50, 20];
+
+// Old Way (Mutates original): rawNumbers.sort((a, b) => a - b);
+// Modern Immutable Way: toSorted() leaves original untouched!
+const sortedNumbers = rawNumbers.toSorted((a, b) => a - b);
+
+console.log("Original untouched:", rawNumbers);   // [40, 10, 50, 20]
+console.log("Sorted copy:", sortedNumbers);       // [10, 20, 40, 50]
+
+/*
+  ------------------------------------------------------------------------------
+  [EXPECTED OUTPUT IN TERMINAL]
+  ------------------------------------------------------------------------------
+  All Product Names: [ 'Mechanical Keyboard', 'Wireless Mouse', 'Gaming Monitor', 'USB-C Cable' ]
+  Affordable & In Stock: [ 'Mechanical Keyboard', 'Wireless Mouse', 'USB-C Cable' ]
+  Total In-Stock Inventory: $135
+  Found Item: Gaming Monitor
+  Any out-of-stock items?: true
+  All items cost over $10?: true
+  Original untouched: [ 40, 10, 50, 20 ]
+  Sorted copy: [ 10, 20, 40, 50 ]
+*/
