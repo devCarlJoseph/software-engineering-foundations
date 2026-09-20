@@ -1,74 +1,100 @@
+/*
+  ==============================================================================
+  W3SCHOOLS-STYLE LEARNING GUIDE: Intersection Types (The "AND" Operator)
+  ==============================================================================
+
+  1. WHAT IS AN INTERSECTION TYPE?
+     An "Intersection Type" combines multiple types into ONE single type.
+     We use the ampersand symbol `&` (which means "AND").
+     An object with an intersection type MUST have ALL properties of EVERY combined type.
+     Syntax: `type Combined = TypeA & TypeB;`
+
+  2. REAL-LIFE ANALOGY:
+     A Smart Phone. It is a Telephone AND a Camera AND an Internet Browser.
+     It has all the features of all three combined into one physical device.
+
+  3. JARGON BUSTER:
+     - Intersection: Combining types using `&`.
+     - Composition: Building large, complex models by snapping together small,
+       reusable building blocks.
+     - Never: If you intersect two impossible things (like `string & number`),
+       TypeScript marks that property as `never` because nothing can be both!
+*/
+
 // =============================================================================
-// FILE: 02-typescript-fundamentals/intersection-types.ts
-// TOPIC: Intersection Types (Combining multiple types using &)
+// STEP 1: DEFINING REUSABLE BUILDING BLOCKS
 // =============================================================================
+// In backend databases, almost every table needs an ID and timestamps.
+// Instead of copying and pasting them, we create reusable pieces:
 
-// An intersection type combines multiple types into one.
-// The resulting type has ALL the properties of every combined type.
-// Syntax: TypeA & TypeB
-
-// -----------------------------------------------------------------------------
-// 1. COMBINING OBJECT TYPES
-// -----------------------------------------------------------------------------
-
-type Timestamped = {
-  createdAt: Date;
-  updatedAt: Date;
-};
-
-type Identifiable = {
+type HasId = {
   id: string;
 };
 
-// Entity combines Identifiable AND Timestamped:
-type Entity = Identifiable & Timestamped;
-
-const databaseRecord: Entity = {
-  id: "rec_98213",
-  createdAt: new Date(),
-  updatedAt: new Date(),
+type HasTimestamps = {
+  createdAt: string;
+  updatedAt: string;
 };
 
-// -----------------------------------------------------------------------------
-// 2. EXTENDING APPLICATION DATA MODELS WITH INTERSECTIONS
-// -----------------------------------------------------------------------------
+// =============================================================================
+// STEP 2: COMBINING USING INTERSECTION (&)
+// =============================================================================
 
-type BasicUserProfile = {
-  username: string;
-  email: string;
+// BaseRecord has BOTH 'id' AND 'createdAt' AND 'updatedAt':
+type BaseDatabaseRecord = HasId & HasTimestamps;
+
+// Domain-specific fields for an e-commerce product:
+type ProductDetails = {
+  title: string;
+  price: number;
+  inStock: boolean;
 };
 
-type UserSecuritySettings = {
-  twoFactorEnabled: boolean;
-  roles: string[];
+// Full Product Record snaps them all together:
+type Product = BaseDatabaseRecord & ProductDetails;
+
+const wirelessMouse: Product = {
+  id: "prod_mouse_99",
+  createdAt: "2026-09-20T10:00:00Z",
+  updatedAt: "2026-09-20T12:30:00Z",
+  title: "Ergonomic Wireless Mouse",
+  price: 29.99,
+  inStock: true,
 };
 
-type AuditMetadata = {
-  lastLoginIp: string;
-};
+console.log("Product Title:", wirelessMouse.title);
+console.log("Product Price: $" + wirelessMouse.price);
+console.log("Database ID:", wirelessMouse.id);
+console.log("Created At:", wirelessMouse.createdAt);
 
-// FullAdminUser requires EVERY property from all 3 types:
-type FullAdminUser = BasicUserProfile & UserSecuritySettings & AuditMetadata;
+// =============================================================================
+// STEP 3: INTERSECTION COLLISION (CREATING NEVER)
+// =============================================================================
+// What happens if two types fight over the same property name?
 
-const adminAccounts: FullAdminUser = {
-  username: "carl_admin",
-  email: "admin@enterprise.com",
-  twoFactorEnabled: true,
-  roles: ["superadmin", "billing"],
-  lastLoginIp: "192.168.1.1",
-};
+type WorkerA = { accessCode: string };
+type WorkerB = { accessCode: number };
 
-// -----------------------------------------------------------------------------
-// 3. PROPERTY CONFLICTS IN INTERSECTIONS (CREATES NEVER)
-// -----------------------------------------------------------------------------
-// If two types have the same property name with incompatible primitive types,
-// the resulting property type becomes 'never' (making the type impossible to satisfy).
+type ImpossibleWorker = WorkerA & WorkerB;
+// The 'accessCode' property is now 'never' because no value can be a string AND a number at the same time!
 
-type TypeA = { value: string };
-type TypeB = { value: number };
+/*
+  ------------------------------------------------------------------------------
+  [EXPECTED OUTPUT IN TERMINAL]
+  ------------------------------------------------------------------------------
+  Product Title: Ergonomic Wireless Mouse
+  Product Price: $29.99
+  Database ID: prod_mouse_99
+  Created At: 2026-09-20T10:00:00Z
+*/
 
-type Conflicting = TypeA & TypeB;
-
-// const impossible: Conflicting = {
-//   value: "text" // Error: Type 'string' is not assignable to type 'never'.
+// =============================================================================
+// TRY IT YOURSELF: DISASTER PREVENTED
+// =============================================================================
+// If you omit even ONE property from an intersected type, TypeScript catches it:
+// const brokenProduct: Product = {
+//   id: "prod_01",
+//   createdAt: "2026-09-20",
+//   // Missing updatedAt, title, price, inStock!
 // };
+// -> TS Error: Type '{ id: string; createdAt: string; }' is missing properties from type 'ProductDetails'.

@@ -1,64 +1,94 @@
+/*
+  ==============================================================================
+  W3SCHOOLS-STYLE LEARNING GUIDE: Type Annotations & Type Inference
+  ==============================================================================
+
+  1. WHAT IS IT?
+     In JavaScript, a variable can hold a number right now and suddenly hold a
+     word 5 seconds later, which leads to silent bugs.
+     A "Type Annotation" is like putting a clear, permanent label on a container
+     that says: "This container can ONLY hold numbers."
+
+  2. REAL-LIFE ANALOGY:
+     A medicine bottle with a printed label: "Liquid Only - 50ml".
+     If someone tries to put powder or rocks into it, they are stopped immediately.
+
+  3. JARGON BUSTER:
+     - Type Annotation: Explicitly writing `: string` or `: number` next to a variable.
+     - Type Inference: TypeScript being smart enough to guess the type automatically
+       from the initial value without you writing it.
+     - Compile-time: The moment BEFORE your code runs, when TypeScript checks for mistakes.
+     - Runtime: The moment your code is actually running on the user's computer or server.
+     - Transpilation: Converting TypeScript code into plain JavaScript so Node.js or
+       browsers can run it.
+*/
+
 // =============================================================================
-// FILE: 02-typescript-fundamentals/type-annotations.ts
-// TOPIC: Type Annotations and Type Inference
+// STEP 1: EXPLICIT ANNOTATIONS (Writing the types yourself)
 // =============================================================================
+const storeName: string = "TechGear Warehouse";
+const maxCartCapacity: number = 10;
+const isStoreOpen: boolean = true;
 
-// -----------------------------------------------------------------------------
-// 1. EXPLICIT VARIABLE TYPE ANNOTATIONS
-// -----------------------------------------------------------------------------
-// Syntax: let/const variableName: Type = value;
+console.log("Store Name:", storeName);
+console.log("Cart Limit:", maxCartCapacity);
+console.log("Store Open Status:", isStoreOpen);
 
-const appName: string = "Foundations App";
-const maxRetryLimit: number = 5;
-const isProduction: boolean = false;
+// =============================================================================
+// STEP 2: TYPE INFERENCE (Letting TypeScript do the work)
+// =============================================================================
+// When you assign a value on the same line, you don't NEED to write `: string`.
+// TypeScript automatically locks it to that type.
+let defaultCurrency = "USD"; // TypeScript automatically infers this as a 'string'
+let itemShippingFee = 4.99;  // TypeScript automatically infers this as a 'number'
 
-// Attempting to assign an incompatible type causes a compile-time error:
-// const invalidAssignment: number = "ten"; // Error: Type 'string' is not assignable to type 'number'.
+defaultCurrency = "EUR"; // Perfectly valid: it's still a string!
+console.log("Updated Currency:", defaultCurrency);
 
-// -----------------------------------------------------------------------------
-// 2. TYPE INFERENCE (WHEN TO OMIT ANNOTATIONS)
-// -----------------------------------------------------------------------------
-// TypeScript automatically infers the type from the initialized value.
-// Best Practice: Let TypeScript infer simple primitive types to avoid clutter.
+// =============================================================================
+// STEP 3: FUNCTION PARAMETERS & RETURN TYPES
+// =============================================================================
+// Always annotate function parameters so people know what to pass in.
+// The return type is placed after the parentheses: (params): ReturnType
 
-let inferredString = "TypeScript automatically knows this is a string";
-let inferredNumber = 42; // Inferred as number
-let inferredBoolean = true; // Inferred as boolean
-
-// inferredNumber = "text"; // Error: Type 'string' is not assignable to type 'number'.
-
-// -----------------------------------------------------------------------------
-// 3. FUNCTION PARAMETER & RETURN TYPE ANNOTATIONS
-// -----------------------------------------------------------------------------
-// Function parameters should ALWAYS have explicit annotations.
-// Return types are placed after the parameter parentheses: (params): ReturnType
-
-function calculateTax(amount: number, taxRate: number): number {
-  return amount * taxRate;
+function calculateTotal(price: number, quantity: number): number {
+  const subtotal = price * quantity;
+  return subtotal;
 }
 
-const taxTotal: number = calculateTax(100, 0.08); // 8
+const keyboardCost: number = calculateTotal(49.99, 2);
+console.log("Total Keyboard Cost: $" + keyboardCost);
 
-// Arrow function with explicit annotations:
-const multiply = (x: number, y: number): number => x * y;
-const productResult: number = multiply(6, 7);
+/*
+  ------------------------------------------------------------------------------
+  [EXPECTED OUTPUT IN TERMINAL]
+  ------------------------------------------------------------------------------
+  Store Name: TechGear Warehouse
+  Cart Limit: 10
+  Store Open Status: true
+  Updated Currency: EUR
+  Total Keyboard Cost: $99.98
+*/
 
-// -----------------------------------------------------------------------------
-// 4. ANNOTATIONS ON DELAYED INITIALIZATION
-// -----------------------------------------------------------------------------
-// If you declare a variable without an immediate value, ALWAYS annotate it.
-// Without an annotation, TypeScript will infer it as 'any' (losing all type safety).
+// =============================================================================
+// BEHIND THE SCENES: WHAT THE COMPILER DOES
+// =============================================================================
+/*
+  1. The TypeScript compiler (tsc) inspects `calculateTotal("49.99", "2")`.
+  2. It sees you promised that parameters must be `number`, but you passed `string`.
+  3. It immediately halts with a red squiggly error BEFORE producing any JavaScript.
+  4. When you build your project, TypeScript STRIPS AWAY all `: string` and `: number`
+     labels, generating clean, fast, vanilla JavaScript.
+*/
 
-let targetUserId: string; // Explicitly declared before assignment
+// =============================================================================
+// TRY IT YOURSELF: DISASTER PREVENTED
+// =============================================================================
+// In plain JavaScript, "49.99" + "2" gives "49.992" (string gluing).
+// TypeScript prevents this catastrophic pricing bug before it ever runs:
 
-targetUserId = "usr_10203";
-// targetUserId = 12345; // Error: Type 'number' is not assignable to type 'string'.
+// maxCartCapacity = "fifteen"; 
+// -> TS Error: Type 'string' is not assignable to type 'number'.
 
-// -----------------------------------------------------------------------------
-// 5. THE 'ANY' TYPE VS EXPLICIT ANNOTATIONS
-// -----------------------------------------------------------------------------
-// 'any' completely turns off type checking for that variable (avoid using this).
-
-let unconstrainedValue: any = "Hello";
-unconstrainedValue = 123;   // Allowed, but dangerous
-unconstrainedValue = false; // Allowed, but disables TypeScript's protection
+// calculateTotal("49.99", 2); 
+// -> TS Error: Argument of type 'string' is not assignable to parameter of type 'number'.

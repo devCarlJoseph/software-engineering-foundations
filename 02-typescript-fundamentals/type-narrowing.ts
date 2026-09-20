@@ -1,118 +1,140 @@
+/*
+  ==============================================================================
+  W3SCHOOLS-STYLE LEARNING GUIDE: Type Narrowing
+  ==============================================================================
+
+  1. WHAT IS TYPE NARROWING?
+     "Type Narrowing" is the process of taking a broad type (like `string | number`)
+     and filtering it down to a more specific type inside an `if` statement or `switch`.
+
+  2. REAL-LIFE ANALOGY:
+     Airport Security Customs Check.
+     Everyone is a "Passenger" (broad type).
+     - If you hold a Local Passport, the officer sends you to Lane 1.
+     - If you hold an International Passport, the officer sends you to Lane 2.
+     Inside Lane 1, the system KNOWS you are a local citizen.
+
+  3. JARGON BUSTER:
+     - Type Guard: A code check (like `typeof x === "string"`) that proves the type to TypeScript.
+     - Discriminated Union: A group of types that all share ONE common property
+       (like `kind: "circle"` vs `kind: "square"`) that acts as an identity badge.
+     - Type Predicate (`val is Type`): A custom function that returns true/false to
+       tell TypeScript: "Yes, this variable is definitely this type!"
+*/
+
 // =============================================================================
-// FILE: 02-typescript-fundamentals/type-narrowing.ts
-// TOPIC: Type Narrowing (Type Guards, in Operator, and Discriminated Unions)
+// STEP 1: TYPEOF TYPE GUARD (FOR PRIMITIVES)
 // =============================================================================
 
-// Type narrowing is the process of refining a broad type (like a union)
-// into a more specific type within a conditional code path.
-
-// -----------------------------------------------------------------------------
-// 1. TYPEOF TYPE GUARDS
-// -----------------------------------------------------------------------------
-// Checks primitive types: "string", "number", "boolean", "symbol", "bigint"
-
-function processValue(val: string | number): number {
-  if (typeof val === "string") {
-    // TypeScript knows 'val' is definitely a string here:
-    return val.length;
-  }
-  // TypeScript knows 'val' must be a number here:
-  return val * 2;
-}
-
-// -----------------------------------------------------------------------------
-// 2. EQUALITY NARROWING (===) AND TRUTHINESS
-// -----------------------------------------------------------------------------
-
-function printTitle(title: string | null | undefined): void {
-  if (title !== null && title !== undefined) {
-    // Narrowed to 'string':
-    console.log("Valid title:", title.toUpperCase());
+function formatInputData(value: string | number): string {
+  if (typeof value === "string") {
+    // TypeScript KNOWS value is a string here:
+    return "String in uppercase: " + value.toUpperCase();
   } else {
-    console.log("No title provided");
+    // TypeScript KNOWS value MUST be a number here:
+    return "Number with 2 decimals: $" + value.toFixed(2);
   }
 }
 
-// -----------------------------------------------------------------------------
-// 3. THE 'IN' OPERATOR (CHECKING PROPERTY EXISTENCE)
-// -----------------------------------------------------------------------------
+console.log(formatInputData("hello foundations"));
+console.log(formatInputData(24.5));
+
+// =============================================================================
+// STEP 2: THE 'IN' OPERATOR (CHECKING OBJECT PROPERTIES)
+// =============================================================================
 
 type Car = { drive: () => void };
 type Boat = { sail: () => void };
 
 function operateVehicle(vehicle: Car | Boat): void {
   if ("drive" in vehicle) {
-    // Narrowed to Car:
+    // TypeScript narrows 'vehicle' to Car!
     vehicle.drive();
   } else {
-    // Narrowed to Boat:
+    // TypeScript narrows 'vehicle' to Boat!
     vehicle.sail();
   }
 }
 
-// -----------------------------------------------------------------------------
-// 4. INSTANCEOF TYPE GUARDS
-// -----------------------------------------------------------------------------
+const myTesla: Car = { drive: () => console.log("Driving on the highway...") };
+operateVehicle(myTesla);
 
-function formatTimestamp(input: Date | string): string {
-  if (input instanceof Date) {
-    // Narrowed to Date instance:
-    return input.toISOString();
-  }
-  // Narrowed to string:
-  return input;
-}
-
-// -----------------------------------------------------------------------------
-// 5. DISCRIMINATED UNIONS (TAGGED UNIONS) - INDUSTRY BEST PRACTICE
-// -----------------------------------------------------------------------------
-// Every type in the union shares a single common literal property (the "discriminant").
+// =============================================================================
+// STEP 3: DISCRIMINATED UNIONS (THE GOLD STANDARD IN TYPESCRIPT)
+// =============================================================================
+// Both shapes share a literal 'kind' tag that identifies them without guessing:
 
 interface Circle {
-  kind: "circle"; // Discriminant
+  kind: "circle"; // Identity tag
   radius: number;
 }
 
-interface Square {
-  kind: "square"; // Discriminant
-  sideLength: number;
+interface Rectangle {
+  kind: "rectangle"; // Identity tag
+  width: number;
+  height: number;
 }
 
-type Shape = Circle | Square;
+type GeometricShape = Circle | Rectangle;
 
-function calculateArea(shape: Shape): number {
+function calculateArea(shape: GeometricShape): number {
   switch (shape.kind) {
     case "circle":
-      // TypeScript automatically narrows 'shape' to Circle:
+      // TypeScript knows shape is Circle!
       return Math.PI * shape.radius ** 2;
-    case "square":
-      // TypeScript automatically narrows 'shape' to Square:
-      return shape.sideLength * shape.sideLength;
+    case "rectangle":
+      // TypeScript knows shape is Rectangle!
+      return shape.width * shape.height;
   }
 }
 
-// -----------------------------------------------------------------------------
-// 6. USER-DEFINED TYPE PREDICATES (VALUE IS TYPE)
-// -----------------------------------------------------------------------------
-// A custom function that returns a boolean, telling TypeScript how to narrow.
+const tableTop: Rectangle = { kind: "rectangle", width: 10, height: 5 };
+console.log("Calculated Area:", calculateArea(tableTop));
 
-interface Fish {
-  swim: () => void;
+// =============================================================================
+// STEP 4: CUSTOM TYPE PREDICATE FUNCTION (x is Type)
+// =============================================================================
+
+interface Dog {
+  bark: () => void;
 }
 
-interface Bird {
-  fly: () => void;
+interface Cat {
+  meow: () => void;
 }
 
-// Return type 'animal is Fish' is the type predicate:
-function isFish(animal: Fish | Bird): animal is Fish {
-  return (animal as Fish).swim !== undefined;
+// 'animal is Dog' is the Type Predicate:
+function isDog(animal: Dog | Cat): animal is Dog {
+  return (animal as Dog).bark !== undefined;
 }
 
-function moveAnimal(animal: Fish | Bird): void {
-  if (isFish(animal)) {
-    animal.swim(); // TypeScript knows this is Fish
+function speak(pet: Dog | Cat): void {
+  if (isDog(pet)) {
+    pet.bark(); // TypeScript knows this is Dog
   } else {
-    animal.fly();  // TypeScript knows this is Bird
+    pet.meow(); // TypeScript knows this is Cat
   }
 }
+
+const myPuppy: Dog = { bark: () => console.log("Woof! Woof!") };
+speak(myPuppy);
+
+/*
+  ------------------------------------------------------------------------------
+  [EXPECTED OUTPUT IN TERMINAL]
+  ------------------------------------------------------------------------------
+  String in uppercase: HELLO FOUNDATIONS
+  Number with 2 decimals: $24.50
+  Driving on the highway...
+  Calculated Area: 50
+  Woof! Woof!
+*/
+
+// =============================================================================
+// TRY IT YOURSELF: DISASTER PREVENTED
+// =============================================================================
+// Without narrowing, calling .toFixed() on string | number is blocked:
+// function badFunction(x: string | number) {
+//   x.toFixed(2);
+// }
+// -> TS Error: Property 'toFixed' does not exist on type 'string | number'. Property 'toFixed' does not exist on type 'string'.

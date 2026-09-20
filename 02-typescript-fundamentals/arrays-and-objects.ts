@@ -1,69 +1,100 @@
+/*
+  ==============================================================================
+  W3SCHOOLS-STYLE LEARNING GUIDE: Arrays, Tuples, and Object Types
+  ==============================================================================
+
+  1. WHAT IS IT?
+     - A Typed Array is a list where every single item must follow the exact same type.
+     - A Tuple is a fixed-size list where each specific position has its own type.
+     - An Object Type defines the expected keys and value types inside an object.
+
+  2. REAL-LIFE ANALOGY:
+     - Typed Array: An egg carton. Every slot must hold an egg; you can't put a battery in it.
+     - Tuple: A GPS Coordinate card: [Latitude, Longitude]. Slot 0 must be Latitude,
+       Slot 1 must be Longitude. You cannot swap them or add a 3rd item randomly.
+     - Object Type: An ID Card template. Must have Name, Age, and optional BloodType.
+
+  3. JARGON BUSTER:
+     - Tuple: An array with a fixed number of items where the type of each position is known.
+     - Readonly: A lock on a property or array that prevents changing its contents.
+     - Optional Property (?): A field in an object that is not required to exist.
+     - Mutation: Modifying existing data in place (like .push() or changing a property).
+*/
+
 // =============================================================================
-// FILE: 02-typescript-fundamentals/arrays-and-objects.ts
-// TOPIC: Arrays, Tuples, Readonly Arrays, and Inline Object Types
+// STEP 1: TYPED ARRAYS
 // =============================================================================
+// Syntax: type[] or Array<type>
 
-// -----------------------------------------------------------------------------
-// 1. TYPED ARRAYS
-// -----------------------------------------------------------------------------
+const studentScores: number[] = [95, 88, 92, 79];
+const studentNames: Array<string> = ["Alice", "Bob", "Carl"];
 
-// Syntax 1: type[] (Most common syntax)
-const taskIds: number[] = [101, 102, 103];
+studentScores.push(100); // Valid: 100 is a number!
+console.log("Updated Scores:", studentScores);
 
-// Syntax 2: Array<type> (Generic syntax)
-const programmingLanguages: Array<string> = ["TypeScript", "JavaScript", "Python"];
+// READONLY ARRAY: Prevents anyone from accidentally modifying the list
+const standardTaxRates: readonly number[] = [0.05, 0.12, 0.20];
+// standardTaxRates.push(0.25); // ERROR: Property 'push' does not exist on 'readonly number[]'.
 
-// Type safety in arrays:
-// taskIds.push("one hundred four"); // Error: Argument of type 'string' is not assignable to parameter of type 'number'.
+// =============================================================================
+// STEP 2: TUPLES (STRICT FIXED-POSITION LISTS)
+// =============================================================================
+// Format: [typeAt0, typeAt1]
 
-// -----------------------------------------------------------------------------
-// 2. READONLY ARRAYS
-// -----------------------------------------------------------------------------
-// Prevents any mutating operations (push, pop, splice, or index assignment).
+// Position 0 = latitude (number), Position 1 = longitude (number)
+let storeCoordinates: [number, number] = [14.5995, 120.9842];
+console.log("Latitude:", storeCoordinates[0]);
+console.log("Longitude:", storeCoordinates[1]);
 
-const immutablePorts: readonly number[] = [3000, 8080, 5432];
-// immutablePorts.push(9000); // Error: Property 'push' does not exist on type 'readonly number[]'.
-// immutablePorts[0] = 3001;  // Error: Index signature in type 'readonly number[]' only permits reading.
+// Named Tuple (gives human-readable labels for self-documentation):
+type ServerResponseTuple = [statusCode: number, statusText: string];
+const apiSuccess: ServerResponseTuple = [200, "OK"];
+console.log("Response Code:", apiSuccess[0], "Message:", apiSuccess[1]);
 
-// Alternative syntax with ReadonlyArray:
-const readonlyTags: ReadonlyArray<string> = ["core", "backend"];
+// =============================================================================
+// STEP 3: OBJECT TYPE ANNOTATIONS
+// =============================================================================
+// Defining the shape of a user account:
 
-// -----------------------------------------------------------------------------
-// 3. TUPLES (FIXED-LENGTH, FIXED-TYPE ORDER ARRAYS)
-// -----------------------------------------------------------------------------
-// A tuple enforces the exact number of elements and the specific type at each position.
-
-// [string, number] -> exactly 2 elements: first must be string, second must be number
-let httpStatusTuple: [number, string] = [200, "OK"];
-
-httpStatusTuple = [404, "Not Found"]; // Valid
-// httpStatusTuple = ["Not Found", 404]; // Error: Type 'string' is not assignable to type 'number'.
-// httpStatusTuple = [200, "OK", "Extra"]; // Error: Source has 3 elements but target allows only 2.
-
-// Named Tuples (for code clarity):
-type GeoCoordinate = [latitude: number, longitude: number];
-const manilaCoords: GeoCoordinate = [14.5995, 120.9842];
-
-// Readonly Tuple:
-const fixedPair: readonly [string, number] = ["Version", 1];
-// fixedPair[0] = "NewVersion"; // Error: Cannot assign to '0' because it is a read-only property.
-
-// -----------------------------------------------------------------------------
-// 4. INLINE OBJECT TYPE ANNOTATIONS
-// -----------------------------------------------------------------------------
-// Enforces property names, value types, and allows optional/readonly flags.
-
-const userAccount: {
-  readonly id: number;      // Cannot be modified after initialization
-  username: string;
-  email: string;
-  avatarUrl?: string;       // Optional property (string or undefined)
+const customerProfile: {
+  readonly id: number;      // Locked: cannot be reassigned
+  fullName: string;         // Required
+  email: string;            // Required
+  phoneNumber?: string;     // Optional: denoted by the '?' symbol
 } = {
-  id: 1,
-  username: "carl_dev",
+  id: 101,
+  fullName: "Carl Joseph",
   email: "carl@example.com",
-  // avatarUrl is optional, so omitting it is valid
+  // phoneNumber was omitted because it has '?' (it's optional)
 };
 
-// userAccount.id = 2; // Error: Cannot assign to 'id' because it is a read-only property.
-userAccount.username = "carl_engineer"; // Valid reassignment
+customerProfile.fullName = "Carl J."; // Valid: fullName is not readonly
+console.log("Customer ID:", customerProfile.id);
+console.log("Customer Name:", customerProfile.fullName);
+
+/*
+  ------------------------------------------------------------------------------
+  [EXPECTED OUTPUT IN TERMINAL]
+  ------------------------------------------------------------------------------
+  Updated Scores: [ 95, 88, 92, 79, 100 ]
+  Latitude: 14.5995
+  Longitude: 120.9842
+  Response Code: 200 Message: OK
+  Customer ID: 101
+  Customer Name: Carl J.
+*/
+
+// =============================================================================
+// TRY IT YOURSELF: DISASTERS PREVENTED
+// =============================================================================
+// 1. Trying to push a word into a number array:
+// studentScores.push("perfect");
+// -> TS Error: Argument of type 'string' is not assignable to parameter of type 'number'.
+
+// 2. Trying to reassign a readonly property:
+// customerProfile.id = 999;
+// -> TS Error: Cannot assign to 'id' because it is a read-only property.
+
+// 3. Adding an extra element to a tuple:
+// storeCoordinates = [14.5995, 120.9842, 50];
+// -> TS Error: Source has 3 elements but target allows only 2.

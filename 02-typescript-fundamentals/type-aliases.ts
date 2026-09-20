@@ -1,72 +1,102 @@
+/*
+  ==============================================================================
+  W3SCHOOLS-STYLE LEARNING GUIDE: Type Aliases
+  ==============================================================================
+
+  1. WHAT IS A TYPE ALIAS?
+     A "Type Alias" allows you to create a custom, meaningful nickname for ANY type.
+     Syntax: `type CustomName = TypeDefinition;`
+
+  2. REAL-LIFE ANALOGY:
+     In basketball, instead of saying "the person who controls the ball and calls plays",
+     we create an alias: "Point Guard".
+     In banking code, instead of generic `string`, we create an alias: `type AccountNumber = string;`
+
+  3. JARGON BUSTER:
+     - Alias: A nickname or alternate name for an existing thing.
+     - Domain Modeling: Using terms from real-world business (like `InvoiceId`, `TaxRate`)
+       instead of raw computer terms (`string`, `number`).
+     - Literal Type: A type that represents one exact specific value (e.g., only `"PAID"`).
+     - Interface vs Type Alias:
+       * Interfaces can ONLY describe object shapes and can be merged.
+       * Type Aliases can describe objects, primitives, unions, and tuples, but CANNOT be merged.
+*/
+
 // =============================================================================
-// FILE: 02-typescript-fundamentals/type-aliases.ts
-// TOPIC: Type Aliases (Custom Named Types)
+// STEP 1: PRIMITIVE DOMAIN ALIASES (Self-Documenting Code)
+// =============================================================================
+type BankAccountNumber = string;
+type DollarAmount = number;
+
+const myCheckingAccount: BankAccountNumber = "ACCT-9928172";
+const myCurrentBalance: DollarAmount = 2450.50;
+
+console.log("Account Number:", myCheckingAccount);
+console.log("Current Balance: $" + myCurrentBalance);
+
+// =============================================================================
+// STEP 2: OBJECT TYPE ALIAS
 // =============================================================================
 
-// A Type Alias gives a new, reusable name to any shape of type
-// (primitives, objects, unions, tuples, or functions).
-// Syntax: type AliasName = TypeDefinition;
-
-// -----------------------------------------------------------------------------
-// 1. PRIMITIVE ALIASES (MEANINGFUL DOMAIN TYPES)
-// -----------------------------------------------------------------------------
-// Makes signatures more descriptive than generic 'string' or 'number'.
-
-type UserId = string;
-type Timestamp = number;
-type EmailAddress = string;
-
-const currentUserId: UserId = "usr_99214";
-const accountCreatedAt: Timestamp = 1700000000;
-
-// -----------------------------------------------------------------------------
-// 2. OBJECT TYPE ALIASES
-// -----------------------------------------------------------------------------
-type TaskItem = {
-  readonly id: number;
-  title: string;
-  isCompleted: boolean;
-  notes?: string; // Optional field
+type SupportTicket = {
+  readonly ticketId: string;
+  customerName: string;
+  issueDescription: string;
+  isResolved: boolean;
 };
 
-const dailyTask: TaskItem = {
-  id: 1,
-  title: "Review Pull Requests",
-  isCompleted: true,
+const urgentIssue: SupportTicket = {
+  ticketId: "TCK_404",
+  customerName: "Alice Miller",
+  issueDescription: "Cannot access database dashboard",
+  isResolved: false,
 };
 
-// -----------------------------------------------------------------------------
-// 3. FUNCTION TYPE ALIASES
-// -----------------------------------------------------------------------------
-// Defines the exact signature (parameters and return type) of a function.
+console.log("Ticket [" + urgentIssue.ticketId + "] for: " + urgentIssue.customerName);
 
-type MathOperation = (firstNumber: number, secondNumber: number) => number;
+// =============================================================================
+// STEP 3: FUNCTION TYPE ALIAS (Blueprint for Functions)
+// =============================================================================
+// Defines what arguments a function must take and what it must return:
 
-const addOperation: MathOperation = (a, b) => a + b;
-const subtractOperation: MathOperation = (a, b) => a - b;
+type CurrencyFormatter = (amount: number, currencyCode: string) => string;
 
-console.log("Add:", addOperation(10, 5));        // 15
-console.log("Subtract:", subtractOperation(10, 5)); // 5
-
-// -----------------------------------------------------------------------------
-// 4. UNION AND TUPLE TYPE ALIASES
-// -----------------------------------------------------------------------------
-// Type aliases can represent unions and tuples directly (which interfaces cannot do alone).
-
-type HttpMethod = "GET" | "POST" | "PUT" | "DELETE" | "PATCH"; // Literal union alias
-const requestMethod: HttpMethod = "POST";
-// const invalidMethod: HttpMethod = "OPTIONS"; // Error: Type '"OPTIONS"' is not assignable to type 'HttpMethod'.
-
-type Coordinate2D = [x: number, y: number]; // Tuple alias
-const point: Coordinate2D = [100, 250];
-
-// -----------------------------------------------------------------------------
-// 5. TYPE ALIASES CANNOT BE RE-OPENED (NO DECLARATION MERGING)
-// -----------------------------------------------------------------------------
-type SystemRole = {
-  name: string;
+const formatMyCurrency: CurrencyFormatter = (amount, currencyCode) => {
+  return currencyCode + " " + amount.toFixed(2);
 };
 
-// Uncommenting the duplicate declaration below causes an error:
-// type SystemRole = { permissions: string[] }; 
-// -> Error: Duplicate identifier 'SystemRole'.
+console.log("Formatted:", formatMyCurrency(1250, "USD")); // "USD 1250.00"
+
+// =============================================================================
+// STEP 4: LITERAL UNION ALIAS (Exclusive Choices)
+// =============================================================================
+// Limits the variable to only these exact strings:
+
+type TransactionStatus = "PENDING" | "APPROVED" | "DECLINED";
+
+let currentTransaction: TransactionStatus = "PENDING";
+currentTransaction = "APPROVED"; // Valid
+
+console.log("Transaction Status:", currentTransaction);
+
+/*
+  ------------------------------------------------------------------------------
+  [EXPECTED OUTPUT IN TERMINAL]
+  ------------------------------------------------------------------------------
+  Account Number: ACCT-9928172
+  Current Balance: $2450.5
+  Ticket [TCK_404] for: Alice Miller
+  Formatted: USD 1250.00
+  Transaction Status: APPROVED
+*/
+
+// =============================================================================
+// TRY IT YOURSELF: DISASTER PREVENTED
+// =============================================================================
+// 1. Typos in status strings are caught immediately:
+// currentTransaction = "APPROVD"; // Notice the spelling mistake!
+// -> TS Error: Type '"APPROVD"' is not assignable to type 'TransactionStatus'.
+
+// 2. Type Aliases CANNOT be declared twice (Unlike Interfaces):
+// type SupportTicket = { priority: number };
+// -> TS Error: Duplicate identifier 'SupportTicket'.

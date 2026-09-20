@@ -1,105 +1,138 @@
+/*
+  ==============================================================================
+  W3SCHOOLS-STYLE LEARNING GUIDE: TypeScript Interfaces
+  ==============================================================================
+
+  1. WHAT IS AN INTERFACE?
+     An "Interface" is an official contract or blueprint. It tells TypeScript:
+     "Any object claiming to be this type MUST have these exact properties and methods."
+
+  2. REAL-LIFE ANALOGY:
+     A Driver's License Application. The government interface says you MUST provide:
+     - Full Legal Name (string)
+     - Birthdate (Date)
+     - Eye Color (string)
+     - Organ Donor status (optional boolean)
+     If you skip your Birthdate, the application is rejected immediately.
+
+  3. JARGON BUSTER:
+     - Contract: A mandatory set of rules an object must fulfill.
+     - Extends (Inheritance): Creating a new interface that takes all rules from an
+       old interface and adds new rules on top.
+     - Declaration Merging: If you write two interfaces with the exact same name,
+       TypeScript automatically merges their rules together into one big contract.
+     - Zero Runtime Cost: Interfaces exist ONLY during development. When converted
+       to JavaScript, they vanish completely (leaving zero overhead).
+*/
+
 // =============================================================================
-// FILE: 02-typescript-fundamentals/interfaces.ts
-// TOPIC: Interfaces (Contracts, Extensibility, and Declaration Merging)
+// STEP 1: DEFINING A BASIC INTERFACE
 // =============================================================================
 
-// -----------------------------------------------------------------------------
-// 1. BASIC INTERFACE DEFINITION
-// -----------------------------------------------------------------------------
-// An interface defines the structure/contract that an object must satisfy.
-
-interface DatabaseConnection {
-  readonly connectionId: string; // Read-only property
-  host: string;
-  port: number;
-  ssl?: boolean;                 // Optional property
+interface SmartWatch {
+  readonly serialNumber: string; // Locked
+  brand: string;
+  batteryLevel: number;
+  hasHeartRateSensor?: boolean;  // Optional
 }
 
-const pgConnection: DatabaseConnection = {
-  connectionId: "conn_pg_01",
-  host: "localhost",
-  port: 5432,
-  // ssl is optional, so omitting it is completely valid
+const myWatch: SmartWatch = {
+  serialNumber: "SN_TECH_8819",
+  brand: "PulseTracker",
+  batteryLevel: 94,
+  hasHeartRateSensor: true,
 };
 
-// pgConnection.connectionId = "new_id"; // Error: Cannot assign to 'connectionId' because it is a read-only property.
+console.log("Watch Brand:", myWatch.brand);
+console.log("Battery remaining:", myWatch.batteryLevel + "%");
 
-// -----------------------------------------------------------------------------
-// 2. INTERFACE WITH METHOD SIGNATURES
-// -----------------------------------------------------------------------------
+// =============================================================================
+// STEP 2: INTERFACES WITH FUNCTIONS (METHOD CONTRACTS)
+// =============================================================================
+// Used in backend development to ensure different payment gateways behave the same.
 
-interface CacheService {
-  get(key: string): string | null;
-  set(key: string, value: string): void;
-  clear(): boolean;
+interface PaymentProcessor {
+  processCharge(amount: number): boolean;
+  issueRefund(transactionId: string): boolean;
 }
 
-const memoryCache: CacheService = {
-  get(key: string): string | null {
-    return key === "token" ? "xyz123" : null;
+const stripeService: PaymentProcessor = {
+  processCharge(amount: number): boolean {
+    console.log("Charging $" + amount + " through Stripe API");
+    return true;
   },
-  set(key: string, value: string): void {
-    console.log(`Stored ${key}: ${value}`);
-  },
-  clear(): boolean {
+  issueRefund(transactionId: string): boolean {
+    console.log("Refunding transaction: " + transactionId);
     return true;
   },
 };
 
-// -----------------------------------------------------------------------------
-// 3. EXTENDING INTERFACES (INHERITANCE)
-// -----------------------------------------------------------------------------
-// Interfaces can inherit properties from one or more other interfaces using 'extends'.
+stripeService.processCharge(49.99);
+stripeService.issueRefund("TX_98765");
 
-interface BaseUser {
+// =============================================================================
+// STEP 3: EXTENDING INTERFACES (INHERITANCE)
+// =============================================================================
+// Don't repeat yourself! Build on top of existing contracts.
+
+interface BasicUser {
   id: string;
-  email: string;
-  createdAt: Date;
+  name: string;
 }
 
-interface AdminUser extends BaseUser {
-  permissions: string[];
-  accessLevel: number;
+interface SuperAdminUser extends BasicUser {
+  permissions: string[]; // Inherits 'id' and 'name', plus adds 'permissions'
 }
 
-const adminAccount: AdminUser = {
-  id: "usr_admin_01",
-  email: "admin@example.com",
-  createdAt: new Date(),
-  permissions: ["manage_users", "view_logs"],
-  accessLevel: 1,
+const headAdmin: SuperAdminUser = {
+  id: "USR_001",
+  name: "Carl",
+  permissions: ["DELETE_USER", "ACCESS_DATABASE", "VIEW_LOGS"],
 };
 
-// -----------------------------------------------------------------------------
-// 4. DECLARATION MERGING (UNIQUE FEATURE OF INTERFACES)
-// -----------------------------------------------------------------------------
-// If you define two interfaces with the exact same name, TypeScript merges them.
+console.log("Admin Name:", headAdmin.name);
+console.log("Admin Permissions Count:", headAdmin.permissions.length);
 
-interface ServerConfig {
-  port: number;
+// =============================================================================
+// STEP 4: DECLARATION MERGING (UNIQUE FEATURE OF INTERFACES)
+// =============================================================================
+// If you write the same interface name twice, TypeScript combines them:
+
+interface AppSettings {
+  appName: string;
 }
 
-interface ServerConfig {
-  host: string;
+interface AppSettings {
+  portNumber: number; // Merged with appName!
 }
 
-// ServerConfig now requires BOTH 'port' AND 'host':
-const config: ServerConfig = {
-  port: 8080,
-  host: "127.0.0.1",
+const productionConfig: AppSettings = {
+  appName: "Foundations Backend",
+  portNumber: 3000,
 };
 
-// -----------------------------------------------------------------------------
-// 5. INDEX SIGNATURES (DYNAMIC PROPERTY KEYS)
-// -----------------------------------------------------------------------------
-// Used when you do not know all property names in advance, but know their types.
+console.log("App:", productionConfig.appName, "running on Port:", productionConfig.portNumber);
 
-interface ErrorDictionary {
-  [errorCode: string]: string; // Any string key must map to a string value
-}
+/*
+  ------------------------------------------------------------------------------
+  [EXPECTED OUTPUT IN TERMINAL]
+  ------------------------------------------------------------------------------
+  Watch Brand: PulseTracker
+  Battery remaining: 94%
+  Charging $49.99 through Stripe API
+  Refunding transaction: TX_98765
+  Admin Name: Carl
+  Admin Permissions Count: 3
+  App: Foundations Backend running on Port: 3000
+*/
 
-const errorMessages: ErrorDictionary = {
-  NOT_FOUND: "The requested resource could not be found",
-  UNAUTHORIZED: "You must be authenticated to access this resource",
-  FORBIDDEN: "You do not have permission for this action",
-};
+// =============================================================================
+// TRY IT YOURSELF: DISASTER PREVENTED
+// =============================================================================
+// Missing a required property causes an immediate error:
+// const brokenWatch: SmartWatch = {
+//   serialNumber: "123",
+//   brand: "BrandX"
+//   // Missing 'batteryLevel'!
+// };
+// -> TS Error: Property 'batteryLevel' is missing in type '{ serialNumber: string; brand: string; }'

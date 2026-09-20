@@ -1,73 +1,106 @@
+/*
+  ==============================================================================
+  W3SCHOOLS-STYLE LEARNING GUIDE: Primitive and Special Types
+  ==============================================================================
+
+  1. WHAT IS IT?
+     "Primitives" are the most basic, foundational building blocks of data.
+     They are stored directly by their value (not by reference) and are immutable.
+     TypeScript adds powerful special types like `void`, `unknown`, and `never`.
+
+  2. REAL-LIFE ANALOGY:
+     Standard measurement units: You measure distance in kilometers and time in seconds.
+     You cannot say "my car traveled 10 seconds of distance".
+     Primitives guarantee you don't confuse incompatible types of data.
+
+  3. JARGON BUSTER:
+     - Primitive: Basic data value (not an object; has no internal methods of its own).
+     - Void: "Nothing is returned here" (used when a function just does a job).
+     - Unknown: "I don't know what this data is yet, so I will force you to check it
+       safely before using it" (the safe alternative to `any`).
+     - Never: "This code path is impossible or will never finish" (like an error throw).
+     - Immutable: Cannot be changed or modified in place.
+*/
+
 // =============================================================================
-// FILE: 02-typescript-fundamentals/primitive-types.ts
-// TOPIC: TypeScript Primitive and Special Types
+// STEP 1: THE STANDARD PRIMITIVES
 // =============================================================================
 
-// -----------------------------------------------------------------------------
-// 1. STANDARD PRIMITIVE TYPES
-// -----------------------------------------------------------------------------
+const userEmail: string = "carl@enterprise.com";
+const userAge: number = 26;
+const isAccountActive: boolean = true;
+const massiveDatabaseId: bigint = 9007199254740992n; // Numbers larger than 2^53 - 1
+const uniqueApiKey: symbol = Symbol("unique_token");
+const profileBiography: null = null; // Explicitly empty
+let pendingActivation: undefined = undefined; // Not yet assigned
 
-// string: Textual data
-const developerName: string = "Carl";
+console.log("Email:", userEmail);
+console.log("Age:", userAge);
+console.log("Account Active?:", isAccountActive);
 
-// number: All numeric values (integers, floats, NaN, Infinity)
-const age: number = 25;
-const pi: number = 3.14159;
+// =============================================================================
+// STEP 2: VOID TYPE (FUNCTIONS THAT RETURN NOTHING)
+// =============================================================================
+// When a function sends an email or logs an alert, it doesn't calculate an answer.
+// Its return type is `void`.
 
-// boolean: true or false
-const hasCompletedTask: boolean = true;
-
-// bigint: Large integers exceeding 2^53 - 1
-const massiveNumber: bigint = 9007199254740991n;
-
-// symbol: Unique identifier
-const uniqueApiKey: symbol = Symbol("apiKey");
-
-// null: Explicit absence of value
-const emptyRecord: null = null;
-
-// undefined: Uninitialized state
-const uninitializedState: undefined = undefined;
-
-// -----------------------------------------------------------------------------
-// 2. VOID TYPE
-// -----------------------------------------------------------------------------
-// Represents the absence of any returned value (commonly used as function return type).
-
-function logSystemAlert(message: string): void {
-  console.log(`[ALERT]: ${message}`);
-  // return "something"; // Error: Type 'string' is not assignable to type 'void'.
+function displayWelcomeBanner(username: string): void {
+  console.log("=========================================");
+  console.log("  WELCOME TO THE PLATFORM, " + username.toUpperCase());
+  console.log("=========================================");
+  // No return statement here!
 }
 
-// -----------------------------------------------------------------------------
-// 3. UNKNOWN TYPE (SAFE ALTERNATIVE TO ANY)
-// -----------------------------------------------------------------------------
-// 'unknown' accepts any value, but you CANNOT perform operations on it until you
-// verify its type (type narrowing).
+displayWelcomeBanner("Carl");
 
-let rawApiData: unknown = "Some external string";
+// =============================================================================
+// STEP 3: UNKNOWN TYPE (THE SAFE "ANY")
+// =============================================================================
+// In real apps, third-party APIs return random JSON.
+// Using `any` is dangerous because it turns off type safety.
+// `unknown` forces you to inspect the data first.
 
-// rawApiData.toUpperCase(); // Error: 'rawApiData' is of type 'unknown'.
+let incomingApiResponse: unknown = "User upgraded to Premium Plan";
 
-// Must narrow the type before using:
-if (typeof rawApiData === "string") {
-  console.log("Safely normalized:", rawApiData.toUpperCase());
+// incomingApiResponse.toUpperCase(); // ERROR: TypeScript blocks this because it's unknown!
+
+// How to handle unknown safely:
+if (typeof incomingApiResponse === "string") {
+  // TypeScript now KNOWS it is safely a string inside this block!
+  console.log("Verified API Message:", incomingApiResponse.toUpperCase());
 }
 
-// -----------------------------------------------------------------------------
-// 4. NEVER TYPE
-// -----------------------------------------------------------------------------
-// Represents values that NEVER occur:
-// - A function that always throws an error
-// - A function that runs an infinite loop
+// =============================================================================
+// STEP 4: NEVER TYPE (VALUES THAT NEVER OCCUR)
+// =============================================================================
+// A function that throws an error halts execution and never returns a value.
 
-function throwFatalError(errorMessage: string): never {
-  throw new Error(`Fatal: ${errorMessage}`);
-  // Function cannot reach its end point
+function raiseCriticalSecurityAlarm(reason: string): never {
+  throw new Error("SECURITY LOCKDOWN: " + reason);
 }
 
-function runInfiniteProcess(): never {
-  while (true) {
-    // Process keeps running indefinitely
-  }
-}
+// raiseCriticalSecurityAlarm("Unauthorized database breach"); // Halts program
+
+/*
+  ------------------------------------------------------------------------------
+  [EXPECTED OUTPUT IN TERMINAL]
+  ------------------------------------------------------------------------------
+  Email: carl@enterprise.com
+  Age: 26
+  Account Active?: true
+  =========================================
+    WELCOME TO THE PLATFORM, CARL
+  =========================================
+  Verified API Message: USER UPGRADED TO PREMIUM PLAN
+*/
+
+// =============================================================================
+// TRY IT YOURSELF: DISASTER PREVENTED
+// =============================================================================
+// In JavaScript, calling .toUpperCase() on a number crashes your server:
+// let id = 123; id.toUpperCase(); // TypeError: id.toUpperCase is not a function
+
+// In TypeScript, this is prevented:
+// const testNum: number = 42;
+// testNum.toUpperCase(); 
+// -> TS Error: Property 'toUpperCase' does not exist on type 'number'.

@@ -1,80 +1,107 @@
+/*
+  ==============================================================================
+  W3SCHOOLS-STYLE LEARNING GUIDE: Union Types (The "OR" Operator)
+  ==============================================================================
+
+  1. WHAT IS A UNION TYPE?
+     A "Union Type" allows a variable to hold values of two or more different types.
+     We use the vertical pipe symbol `|` (which means "OR").
+     Syntax: `let data: string | number;`
+
+  2. REAL-LIFE ANALOGY:
+     Payment at a coffee shop: You can pay with Cash OR Credit Card OR Mobile App.
+     Any of those three is accepted, but you cannot pay with a button from your coat.
+
+  3. JARGON BUSTER:
+     - Union: Combining multiple types with `|`.
+     - Pipe Operator (`|`): The symbol representing "OR" in type definitions.
+     - Common Property Rule: When an object can be TypeA OR TypeB, TypeScript only
+       allows you to access properties that exist on BOTH types (until you check which one it is).
+*/
+
 // =============================================================================
-// FILE: 02-typescript-fundamentals/union-types.ts
-// TOPIC: Union Types (Value can be one of several types using |)
+// STEP 1: PRIMITIVE UNIONS
+// =============================================================================
+// In databases, an ID is sometimes an integer (101) and sometimes a UUID string ("uuid-abc-123"):
+
+let orderTrackerId: string | number;
+
+orderTrackerId = "TRK-9812-XYZ"; // Valid: it's a string!
+console.log("Order Tracking ID (String):", orderTrackerId);
+
+orderTrackerId = 405912;         // Valid: it's a number!
+console.log("Order Tracking ID (Number):", orderTrackerId);
+
+// =============================================================================
+// STEP 2: LITERAL UNIONS (PREVENTING TYPOS)
+// =============================================================================
+// Instead of allowing any string, we lock down the exact valid options:
+
+type OrderDeliveryStatus = "ORDER_PLACED" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+
+let currentStatus: OrderDeliveryStatus = "ORDER_PLACED";
+currentStatus = "SHIPPED"; // Valid transition
+
+console.log("Current Delivery Status:", currentStatus);
+
+// =============================================================================
+// STEP 3: NULLABLE UNIONS (HANDLING EMPTY DATA SAFELY)
+// =============================================================================
+// In APIs, a user's address might not be entered yet:
+
+let userAddress: string | null = null; // Currently empty
+console.log("Address initially:", userAddress);
+
+userAddress = "123 Main St, New York"; // Populated after user fills form
+console.log("Address updated:", userAddress);
+
+// =============================================================================
+// STEP 4: OBJECT UNIONS & THE COMMON PROPERTY RULE
 // =============================================================================
 
-// -----------------------------------------------------------------------------
-// 1. BASIC PRIMITIVE UNION TYPES
-// -----------------------------------------------------------------------------
-// Syntax: TypeA | TypeB
-
-let identifier: string | number;
-
-identifier = "UUID-908123"; // Valid: string
-identifier = 10045;         // Valid: number
-// identifier = true;       // Error: Type 'boolean' is not assignable to type 'string | number'.
-
-// Union in function parameters:
-function formatInput(input: string | number): string {
-  return `Formatted: ${input}`;
-}
-console.log(formatInput("Hello")); // "Formatted: Hello"
-console.log(formatInput(42));      // "Formatted: 42"
-
-// -----------------------------------------------------------------------------
-// 2. LITERAL VALUE UNIONS
-// -----------------------------------------------------------------------------
-// Restricts a variable to specific exact values rather than any string or number.
-
-type TaskStatus = "pending" | "in_progress" | "completed" | "archived";
-
-let currentTaskStatus: TaskStatus = "pending";
-currentTaskStatus = "in_progress"; // Valid
-// currentTaskStatus = "deleted";  // Error: Type '"deleted"' is not assignable to type 'TaskStatus'.
-
-type DiceRoll = 1 | 2 | 3 | 4 | 5 | 6;
-const roll: DiceRoll = 4;
-
-// -----------------------------------------------------------------------------
-// 3. UNIONS WITH NULL AND UNDEFINED (NULLABLE TYPES)
-// -----------------------------------------------------------------------------
-// Crucial for dealing with data that may not yet exist (e.g. database results).
-
-type UserBio = string | null;
-
-let bio: UserBio = "Full-stack developer";
-bio = null; // Valid (explicitly cleared)
-
-// -----------------------------------------------------------------------------
-// 4. UNIONS OF OBJECT TYPES & COMMON PROPERTY ACCESS
-// -----------------------------------------------------------------------------
-// When a variable is a union of multiple object types, TypeScript ONLY allows
-// direct access to properties that exist on ALL members of the union.
-
-type EmailNotification = {
-  id: string;
-  recipientEmail: string;
-  sentAt: Date;
+type EmailAlert = {
+  notificationId: string; // Common to both
+  sentAt: Date;           // Common to both
+  recipientEmail: string; // ONLY in EmailAlert
 };
 
-type SmsNotification = {
-  id: string;
-  phoneNumber: string;
-  sentAt: Date;
+type SmsAlert = {
+  notificationId: string; // Common to both
+  sentAt: Date;           // Common to both
+  phoneNumber: string;    // ONLY in SmsAlert
 };
 
-type NotificationPayload = EmailNotification | SmsNotification;
+type OutgoingAlert = EmailAlert | SmsAlert;
 
-const activeNotice: NotificationPayload = {
-  id: "notif_001",
-  recipientEmail: "user@example.com",
+const welcomeNotice: OutgoingAlert = {
+  notificationId: "NOTIF_01",
   sentAt: new Date(),
+  recipientEmail: "carl@example.com",
 };
 
-// 'id' and 'sentAt' exist on BOTH types, so direct access is completely safe:
-console.log("Notice ID:", activeNotice.id);
-console.log("Sent At:", activeNotice.sentAt);
+// Safe: 'notificationId' exists on both EmailAlert AND SmsAlert
+console.log("Alert ID:", welcomeNotice.notificationId);
 
-// Accessing properties unique to only one member is prohibited without narrowing:
-// console.log(activeNotice.recipientEmail);
-// -> Error: Property 'recipientEmail' does not exist on type 'NotificationPayload'.
+/*
+  ------------------------------------------------------------------------------
+  [EXPECTED OUTPUT IN TERMINAL]
+  ------------------------------------------------------------------------------
+  Order Tracking ID (String): TRK-9812-XYZ
+  Order Tracking ID (Number): 405912
+  Current Delivery Status: SHIPPED
+  Address initially: null
+  Address updated: 123 Main St, New York
+  Alert ID: NOTIF_01
+*/
+
+// =============================================================================
+// TRY IT YOURSELF: DISASTER PREVENTED
+// =============================================================================
+// 1. Assigning an invalid type to a union:
+// orderTrackerId = true; 
+// -> TS Error: Type 'boolean' is not assignable to type 'string | number'.
+
+// 2. Breaking the Common Property Rule:
+// console.log(welcomeNotice.recipientEmail);
+// -> TS Error: Property 'recipientEmail' does not exist on type 'OutgoingAlert'.
+// (Why? Because if welcomeNotice was an SmsAlert, recipientEmail would crash with undefined!)
